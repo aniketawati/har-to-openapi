@@ -69,7 +69,7 @@ function tryGetHostname(url: string, logErrors?: boolean, fallback?: string): st
   return fallback;
 }
 
-const generateSpecs = async <T extends Har>(har: T, config?: HarToOpenAPIConfig): Promise<HarToOpenAPISpec[]> => {
+const generateSpecs = async <T extends Har>(har: T, config?: HarToOpenAPIConfig, oldSpecs?: HarToOpenAPISpec[]): Promise<HarToOpenAPISpec[]> => {
   if (!har?.log?.entries?.length) {
     return [];
   }
@@ -107,11 +107,12 @@ const generateSpecs = async <T extends Har>(har: T, config?: HarToOpenAPIConfig)
   const specs: HarToOpenAPISpec[] = [];
 
   for (const domain in groupedByHostname) {
-    try {
+    try {      
       // loop through har entries
-      const spec = createEmptyApiSpec();
-      spec.info.title = "HarToOpenApi";
-      spec.info.description = `OpenAPI spec generated from HAR data for ${domain} on ${new Date().toISOString()}`;
+      const spec = oldSpecs?.find((spec) => spec.domain === domain)?.spec || createEmptyApiSpec();
+      
+      spec.info.title = "Api Spec";
+      spec.info.description = `OpenAPI spec generated from HAR data for ${domain}`;
 
       const harEntriesForDomain = groupedByHostname[domain];
 
@@ -308,8 +309,8 @@ const generateSpecs = async <T extends Har>(har: T, config?: HarToOpenAPIConfig)
 
   return specs;
 };
-const generateSpec = async <T extends Har>(har: T, config?: HarToOpenAPIConfig): Promise<HarToOpenAPISpec> => {
-  const specs = await generateSpecs(har, config);
+const generateSpec = async <T extends Har>(har: T, config?: HarToOpenAPIConfig, oldSpecs?: HarToOpenAPISpec[]): Promise<HarToOpenAPISpec> => {
+  const specs = await generateSpecs(har, config, oldSpecs);
   if (specs.length) {
     return specs[0];
   }
