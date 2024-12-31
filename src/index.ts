@@ -319,4 +319,4 @@ const generateSpec = async <T extends Har>(har: T, config?: HarToOpenAPIConfig, 
   return { spec, yamlSpec: YAML.dump(spec), domain: undefined };
 };
 
-export { generateSpec, generateSpecs };
+export { generateSpec, generateSpecs, HarToOpenAPIConfig, HarToOpenAPISpec };
